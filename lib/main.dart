@@ -21,6 +21,17 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List _toDoList = [];
 
+  @override
+  void initState() {
+    super.initState();
+
+    _readData().then((data) {
+      setState(() {
+        _toDoList = json.decode(data);
+      });
+    });
+  }
+
   final _toDoController = TextEditingController();
 
   void _addToDo() {
@@ -30,6 +41,7 @@ class _HomeState extends State<Home> {
       _toDoController.text = '';
       toDo['checked'] = false;
       _toDoList.add(toDo);
+      _saveData();
     });
   }
 
@@ -82,6 +94,7 @@ class _HomeState extends State<Home> {
                     onChanged: (check) {
                       setState(() {
                         _toDoList[index]['checked'] = check;
+                        _saveData();
                       });
                     },
                   );
