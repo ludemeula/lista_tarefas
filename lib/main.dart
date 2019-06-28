@@ -6,6 +6,10 @@ import 'package:path_provider/path_provider.dart';
 void main() {
   runApp(MaterialApp(
     home: Home(),
+    theme: ThemeData(
+        buttonColor: Color(0xff8bf5ff),
+        hintColor: Colors.black,
+        primaryColor: Color(0xffe0e0e0)),
   ));
 }
 
@@ -17,16 +21,28 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List _toDoList = [];
 
+  final _toDoController = TextEditingController();
+
+  void _addToDo() {
+    setState(() {
+      Map<String, dynamic> toDo = Map();
+      toDo['title'] = _toDoController.text;
+      _toDoController.text = '';
+      toDo['checked'] = false;
+      _toDoList.add(toDo);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Lista de Tarefas',
-          style: TextStyle(color: Colors.black),
+          //style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
-        backgroundColor: Color(0xff4fc3f7),
+        backgroundColor: Color(0xff0092c4),
       ),
       body: Column(
         children: <Widget>[
@@ -36,20 +52,41 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 Expanded(
                   child: TextField(
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                          labelText: 'Nova Tarefa',
-                          helperText: 'Insira a Nova Tarefa'),
-                      style: TextStyle(fontSize: 20)),
+                    decoration: InputDecoration(
+                        labelText: 'Nova Tarefa',
+                        helperText: 'Insira a Nova Tarefa'),
+                    style: TextStyle(fontSize: 20),
+                    controller: _toDoController,
+                  ),
                 ),
                 RaisedButton(
                   child: Text('ADD'),
-                  onPressed: () {},
-                )
+                  onPressed: _addToDo,
+                ),
               ],
             ),
-          )
+          ),
+          Expanded(
+            child: ListView.builder(
+                padding: EdgeInsets.only(top: 5),
+                itemCount: _toDoList.length,
+                itemBuilder: (context, index) {
+                  return CheckboxListTile(
+                    title: Text(_toDoList[index]['title']),
+                    value: _toDoList[index]['checked'],
+                    secondary: CircleAvatar(
+                      child: Icon(_toDoList[index]['checked']
+                          ? Icons.check_circle
+                          : Icons.error_outline),
+                    ),
+                    onChanged: (check) {
+                      setState(() {
+                        _toDoList[index]['checked'] = check;
+                      });
+                    },
+                  );
+                }),
+          ),
         ],
       ),
     );
