@@ -122,21 +122,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       direction: DismissDirection.startToEnd,
-      child: CheckboxListTile(
-        title: Text(_toDoList[index]['title']),
-        value: _toDoList[index]['checked'],
-        secondary: CircleAvatar(
-          child: Icon(_toDoList[index]['checked']
-              ? Icons.check_circle
-              : Icons.error_outline),
-        ),
-        onChanged: (check) {
-          setState(() {
-            _toDoList[index]['checked'] = check;
-            _saveData();
-          });
-        },
-      ),
+      child: buildCheckboxListTile(index),
       onDismissed: (direction) {
         setState(() {
           _lastRemoved = Map.from(_toDoList[index]);
@@ -145,22 +131,44 @@ class _HomeState extends State<Home> {
 
           _saveData();
 
-          final snack = SnackBar(
-            content: Text('Tarefa \"${_lastRemoved['title']}\" removida!'),
-            action: SnackBarAction(
-                label: 'Desfazer',
-                onPressed: () {
-                  setState(() {
-                    _toDoList.insert(_lastRemovedIndex, _lastRemoved);
-                    _saveData();
-                  });
-                }),
-            duration: Duration(seconds: 2),
-          );
+          final snack = buildSnackBar();
           Scaffold.of(context).removeCurrentSnackBar();
           Scaffold.of(context).showSnackBar(snack);
         });
       },
+    );
+  }
+
+  Widget buildCheckboxListTile(index) {
+    return CheckboxListTile(
+      title: Text(_toDoList[index]['title']),
+      value: _toDoList[index]['checked'],
+      secondary: CircleAvatar(
+        child: Icon(_toDoList[index]['checked']
+            ? Icons.check_circle
+            : Icons.error_outline),
+      ),
+      onChanged: (check) {
+        setState(() {
+          _toDoList[index]['checked'] = check;
+          _saveData();
+        });
+      },
+    );
+  }
+
+  Widget buildSnackBar() {
+    return SnackBar(
+      content: Text('Tarefa \"${_lastRemoved['title']}\" removida!'),
+      action: SnackBarAction(
+          label: 'Desfazer',
+          onPressed: () {
+            setState(() {
+              _toDoList.insert(_lastRemovedIndex, _lastRemoved);
+              _saveData();
+            });
+          }),
+      duration: Duration(seconds: 2),
     );
   }
 
