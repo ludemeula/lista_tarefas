@@ -81,14 +81,31 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-                padding: EdgeInsets.only(top: 5),
-                itemCount: _toDoList.length,
-                itemBuilder: buildItem),
-          ),
+              child: RefreshIndicator(
+                  child: ListView.builder(
+                      padding: EdgeInsets.only(top: 5),
+                      itemCount: _toDoList.length,
+                      itemBuilder: buildItem),
+                  onRefresh: refresh)),
         ],
       ),
     );
+  }
+
+  Future<Null> refresh() async {
+    await Future.delayed(Duration(seconds: 1));
+
+    setState(() {
+      _toDoList.sort((a, b){
+        if (a['checked'] && !b['checked']) return 1;
+        else if (!a['checked'] && b['checked']) return -1;
+        else return 0;
+      });
+
+      _saveData();
+    });
+
+    return null;
   }
 
   Widget buildItem(context, index) {
@@ -98,7 +115,10 @@ class _HomeState extends State<Home> {
         color: Colors.red,
         child: Align(
           alignment: Alignment(-0.9, 0),
-          child: Icon(Icons.delete, color: Colors.white,),
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
+          ),
         ),
       ),
       direction: DismissDirection.startToEnd,
@@ -118,7 +138,6 @@ class _HomeState extends State<Home> {
         },
       ),
       onDismissed: (direction) {
-
         setState(() {
           _lastRemoved = Map.from(_toDoList[index]);
           _lastRemovedIndex = index;
@@ -128,17 +147,19 @@ class _HomeState extends State<Home> {
 
           final snack = SnackBar(
             content: Text('Tarefa \"${_lastRemoved['title']}\" removida!'),
-            action: SnackBarAction(label: 'Desfazer', onPressed: () {
-              setState(() {
-                _toDoList.insert(_lastRemovedIndex, _lastRemoved);
-                _saveData();
-              });
-            }),
+            action: SnackBarAction(
+                label: 'Desfazer',
+                onPressed: () {
+                  setState(() {
+                    _toDoList.insert(_lastRemovedIndex, _lastRemoved);
+                    _saveData();
+                  });
+                }),
             duration: Duration(seconds: 2),
           );
+          Scaffold.of(context).removeCurrentSnackBar();
           Scaffold.of(context).showSnackBar(snack);
         });
-
       },
     );
   }
